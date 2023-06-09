@@ -7,19 +7,19 @@ function App() {
 
   // componentDidUpdate - executa toda vez que o component atualiza
 
-  useEffect(() => {
-    console.log('componentDidUpdate');
-  });
+  // useEffect(() => {
+  //   console.log('componentDidUpdate');
+  // });
 
-  // componentDidMount - executa uma vez
-  useEffect(() => {
-    console.log('componentDidMount');
-  }, []);
+  // // componentDidMount - executa uma vez
+  // useEffect(() => {
+  //   console.log('componentDidMount');
+  // }, []);
 
   // componentDidMount - com dependencia -  executa toda vez que dependencia mudar EX: [counter]
   useEffect(() => {
-    console.log('Contador Mudou para', counter);
-  }, [counter]);
+    console.log('C1', counter, 'C2', counter2);
+  }, [counter, counter2]);
 
   return (
     <div className="App">
