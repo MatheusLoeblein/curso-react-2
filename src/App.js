@@ -1,58 +1,35 @@
-import logo from './logo.svg';
+import { useState, useEffect } from 'react';
 import './App.css';
-import { useState } from 'react';
-// import { Component } from 'react';
 
 function App() {
-  // const { reverse } = this.state;
-  const [reverse, setReverse] = useState(false);
   const [counter, setCounter] = useState(0);
-  const reverseClass = reverse ? 'reverse' : '';
+  const [counter2, setCounter2] = useState(0);
 
-  const handleClick = () => {
-    setReverse((reverse) => !reverse);
-  };
-  const handleIncrement = () => {
-    setCounter((prevCounter) => prevCounter + 1);
-  };
+  // componentDidUpdate - executa toda vez que o component atualiza
+
+  useEffect(() => {
+    console.log('componentDidUpdate');
+  });
+
+  // componentDidMount - executa uma vez
+  useEffect(() => {
+    console.log('componentDidMount');
+  }, []);
+
+  // componentDidMount - com dependencia -  executa toda vez que dependencia mudar EX: [counter]
+  useEffect(() => {
+    console.log('Contador Mudou para', counter);
+  }, [counter]);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className={`App-logo ${reverseClass}`} alt="logo" />
-
-        <h1>Contador: {counter}</h1>
-
-        <button onClick={handleClick}>Reverse</button>
-        <button onClick={handleIncrement}>Incrementar</button>
-      </header>
+      <h1>
+        C1: {counter} C2: {counter2}
+      </h1>
+      <button onClick={() => setCounter(counter + 1)}>+</button>
+      <button onClick={() => setCounter2(counter2 + 1)}>+(2)</button>
     </div>
   );
 }
-
-// class App extends Component {
-//   state = {
-//     reverse: false,
-//   };
-
-//   handleClick = () => {
-//     const { reverse } = this.state;
-//     this.setState({ reverse: !reverse });
-//   };
-
-//   render() {
-//     const { reverse } = this.state;
-//     const reverseClass = reverse ? 'reverse' : '';
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <img src={logo} className={`App-logo ${reverseClass}`} alt="logo" />
-//           <p>{this.state.count}</p>
-//           <button onClick={() => this.handleClick()}>Reverse</button>
-//         </header>
-//       </div>
-//     );
-//   }
-// }
 
 export default App;
