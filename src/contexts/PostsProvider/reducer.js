@@ -11,6 +11,7 @@ export const reducer = (state, action) => {
       return { ...state, loading: true };
     }
   }
+
   console.log('Não encontrei a action', action.type);
   return { ...state };
 };
