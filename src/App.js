@@ -1,44 +1,72 @@
-import { useReducer } from 'react';
+import { createContext } from 'react';
 import './App.css';
+import P from 'prop-types';
+import { useReducer, useRef } from 'react';
+import { useContext } from 'react';
 
-const globalState = {
+// action.js
+export const actions = {
+  CHANGE_TITLE: 'CHANGE_TITLE',
+};
+
+// data.js
+export const globalState = {
   title: 'O titulo de contexto',
   body: 'O Body do contexto',
   counter: 0,
 };
 
-const reducer = (state, action) => {
+// reducer.js
+export const reducer = (state, action) => {
   switch (action.type) {
-    case 'muda':
+    case 'CHANGE_TITLE':
       return { ...state, title: action.payload };
-    case 'inverter': {
-      const { title } = state;
-      return { ...state, title: title.split('').reverse().join('') };
-    }
   }
   return { ...state };
 };
 
-function App() {
+// AppContext.jsx
+export const Context = createContext();
+export const AppContext = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, globalState);
-  const { counter, title } = state;
+
+  const changeTitle = (payload) => {
+    dispatch({ type: actions.CHANGE_TITLE, payload });
+  };
+
   return (
-    <div>
-      <h1>
-        {title} {counter}
+    <Context.Provider value={{ state, changeTitle }}>
+      {children}
+    </Context.Provider>
+  );
+};
+AppContext.propTypes = {
+  children: P.node,
+};
+
+// index.jsx
+export const H1 = () => {
+  const context = useContext(Context);
+  const inputRef = useRef();
+
+  return (
+    <>
+      <h1 onClick={() => context.changeTitle(inputRef.current.value)}>
+        {context.state.title}
       </h1>
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'muda',
-            payload: new Date().toLocaleString('pt-BR'),
-          })
-        }
-      >
-        Muda
-      </button>
-      <button onClick={() => dispatch({ type: 'inverter' })}>inverter</button>
-    </div>
+      <input type="text" ref={inputRef} />{' '}
+    </>
+  );
+};
+
+// App.jsx
+function App() {
+  return (
+    <AppContext>
+      <div>
+        <H1 />
+      </div>
+    </AppContext>
   );
 }
 
