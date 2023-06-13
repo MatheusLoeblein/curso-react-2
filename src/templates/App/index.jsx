@@ -1,43 +1,67 @@
-import { useState, useEffect } from 'react';
-import { useFetch } from './use-fetch';
+import { useState, useEffect, useCallback } from 'react';
 
-export const Home = () => {
-  const [postId, setPostId] = useState('');
-  const [result, loading] = useFetch(
-    'https://jsonplaceholder.typicode.com/posts/' + postId,
-    {
-      headers: { ABC: 1 },
-    },
-  );
+const useAsync = (asyncFunction, shouldRun) => {
+  const [state, setState] = useState({
+    result: null,
+    error: null,
+    status: 'idle',
+  });
+
+  const run = useCallback(async () => {
+    console.log('EFFECT', new Date().toLocaleString());
+    await new Promise((r) => setTimeout(r, 2000));
+    setState({
+      result: null,
+      error: null,
+      status: 'pending',
+    });
+
+    return asyncFunction()
+      .then((response) => {
+        setState({
+          result: response,
+          error: null,
+          status: 'settled',
+        });
+      })
+      .catch((error) => {
+        setState({
+          result: null,
+          error: error,
+          status: 'error',
+        });
+      });
+  }, [asyncFunction]);
 
   useEffect(() => {
-    console.log('ID Post', postId);
-  }, [postId]);
+    if (shouldRun) {
+      run();
+    }
+  }, [run, shouldRun]);
 
-  if (loading) {
-    return <p>loading...</p>;
+  return [run, state.result, state.error, state.status];
+};
+
+const fetchData = async () => {
+  await new Promise((r) => setTimeout(r, 2000));
+  const data = await fetch('https://jsonplaceholder.typicode.com/posts');
+  const json = await data.json();
+  return json;
+};
+export const Home = () => {
+  const [posts, setPosts] = useState(null);
+  const [reFetchData, result, error, status] = useAsync(fetchData, true);
+
+  if (status == 'idle') {
+    return <pre>Nada Exacutando</pre>;
   }
-
-  const handleClick = (id) => {
-    setPostId(id);
-  };
-  if (!loading && result) {
-    return (
-      <div>
-        {result?.length > 0 ? (
-          result.map((p) => (
-            <div key={`post-${p.id}`} onClick={() => handleClick(p.id)}>
-              <p>{p.title}</p>
-            </div>
-          ))
-        ) : (
-          <div onClick={() => handleClick('')}>
-            <p>{result.title}</p>
-          </div>
-        )}
-      </div>
-    );
+  if (status == 'pending') {
+    return <pre>Loading...</pre>;
   }
-
-  return <h1>Oi</h1>;
+  if (status == 'error') {
+    return <pre>{JSON.stringify(error, null, 2)}</pre>;
+  }
+  if (status == 'settled') {
+    return <pre>{JSON.stringify(result, null, 2)}</pre>;
+  }
 };
