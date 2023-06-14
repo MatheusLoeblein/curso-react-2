@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { forwardRef } from 'react';
 import { useLayoutEffect } from 'react';
 import { useState } from 'react';
 
@@ -19,19 +20,27 @@ export const Home = () => {
   return (
     <>
       <button onClick={() => handleClick()}>Count {counted.slice(-1)}</button>
-
-      <div
-        ref={divRef}
-        style={{
-          height: '100px',
-          width: '100px',
-          overflowY: 'scroll',
-        }}
-      >
-        {counted.map((c) => {
-          return <p key={`c-${c}`}>{c}</p>;
-        })}
-      </div>
+      <DisplayCounted counted={counted} ref={divRef}></DisplayCounted>
     </>
   );
 };
+
+export const DisplayCounted = forwardRef(function DisplayCounted(
+  { counted },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      style={{
+        height: '100px',
+        width: '100px',
+        overflowY: 'scroll',
+      }}
+    >
+      {counted.map((c) => {
+        return <p key={`c-${c}`}>{c}</p>;
+      })}
+    </div>
+  );
+});
