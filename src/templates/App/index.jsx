@@ -1,71 +1,48 @@
-import {
-  useRef,
-  useState,
-  useLayoutEffect,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
-import P from 'prop-types';
+import { useDebugValue, useEffect, useState } from 'react';
 
-export const Home = () => {
-  const [counted, setCounted] = useState([0, 1, 2, 3, 4]);
-  const divRef = useRef();
+const useMediaQuery = (queryValue, initialValue = false) => {
+  const [match, setMatch] = useState(initialValue);
 
-  useLayoutEffect(() => {
-    const now = Date.now();
-    // while (Date.now() < now + 600);
-    divRef.current.divRef.scrollTop = divRef.current.divRef.scrollHeight;
+  useDebugValue(`Query ${queryValue}`, (name) => {
+    return name + ' Modificado';
   });
 
-  const handleClick = () => {
-    setCounted((c) => [...c, +c.slice(-1) + 1]);
-    divRef.current.handleClick();
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const matchMedia = window.matchMedia(queryValue);
+    const handleChange = () => {
+      if (!isMounted) return;
+      setMatch(Boolean(matchMedia.matches));
+    };
 
-  return (
-    <>
-      <button onClick={handleClick}>Count {counted.slice(-1)}</button>
-      <DisplayCounted counted={counted} ref={divRef}></DisplayCounted>
-    </>
-  );
+    matchMedia.addEventListener('change', handleChange);
+
+    setMatch(!!matchMedia.matches);
+
+    return () => {
+      isMounted = false;
+      matchMedia.removeEventListener('change', handleChange);
+    };
+  }, [queryValue]);
+
+  return match;
 };
 
-export const DisplayCounted = forwardRef(function DisplayCounted(
-  { counted },
-  ref,
-) {
-  const [rand, setRand] = useState('0.24');
-  const divRef = useRef();
+export const Home = () => {
+  const huge = useMediaQuery('(min-width: 980px)');
+  const big = useMediaQuery('(max-width: 979px) and (min-width: 768px)');
+  const medium = useMediaQuery('(max-width: 767px) and (min-width: 521px)');
+  const small = useMediaQuery('(max-width: 521px)');
 
-  const handleClick = () => {
-    setRand(Math.random().toFixed(2));
-  };
+  const background = huge
+    ? 'green'
+    : big
+    ? 'red'
+    : medium
+    ? 'yellow'
+    : small
+    ? 'purple'
+    : null;
 
-  useImperativeHandle(ref, () => ({
-    handleClick,
-    divRef: divRef.current,
-  }));
-  return (
-    <div
-      ref={divRef}
-      style={{
-        padding: '20px',
-        height: '200px',
-        width: '200px',
-        overflowY: 'scroll',
-      }}
-    >
-      {counted.map((c) => {
-        return (
-          <p onClick={handleClick} key={`c-${c}`}>
-            {c} +++ {rand}
-          </p>
-        );
-      })}
-    </div>
-  );
-});
-
-DisplayCounted.propTypes = {
-  counted: P.number,
+  return <div style={{ fontSize: '50px', background }}>Oi</div>;
 };
